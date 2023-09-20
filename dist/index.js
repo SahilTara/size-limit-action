@@ -3844,12 +3844,13 @@ function run() {
             const script = core_1.getInput("script");
             const packageManager = core_1.getInput("package_manager");
             const directory = core_1.getInput("directory") || process.cwd();
+            const installScript = core_1.getInput("install_script");
             const windowsVerbatimArguments = core_1.getInput("windows_verbatim_arguments") === "true" ? true : false;
             const octokit = new github_1.GitHub(token);
             const term = new Term_1.default();
             const limit = new SizeLimit_1.default();
-            const { status, output } = yield term.execSizeLimit(null, skipStep, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager);
-            const { output: baseOutput } = yield term.execSizeLimit(pr.base.ref, null, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager);
+            const { status, output } = yield term.execSizeLimit(null, skipStep, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager, installScript);
+            const { output: baseOutput } = yield term.execSizeLimit(pr.base.ref, null, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager, installScript);
             let base;
             let current;
             try {
@@ -12139,7 +12140,7 @@ class Term {
     getPackageManager(directory) {
         return has_yarn_1.default(directory) ? "yarn" : has_pnpm_1.default(directory) ? "pnpm" : "npm";
     }
-    execSizeLimit(branch, skipStep, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager) {
+    execSizeLimit(branch, skipStep, buildScript, cleanScript, windowsVerbatimArguments, directory, script, packageManager, installScript) {
         return __awaiter(this, void 0, void 0, function* () {
             const manager = packageManager || this.getPackageManager(directory);
             let output = "";
@@ -12153,7 +12154,10 @@ class Term {
                 yield exec_1.exec(`git checkout -f ${branch}`);
             }
             if (skipStep !== INSTALL_STEP && skipStep !== BUILD_STEP) {
-                yield exec_1.exec(`${manager} install`, [], {
+                const installCommand = installScript
+                    ? installScript
+                    : `${manager} install`;
+                yield exec_1.exec(installCommand, [], {
                     cwd: directory
                 });
             }

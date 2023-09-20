@@ -25,7 +25,8 @@ class Term {
     windowsVerbatimArguments?: boolean,
     directory?: string,
     script?: string,
-    packageManager?: string
+    packageManager?: string,
+    installScript?: string
   ): Promise<{ status: number; output: string }> {
     const manager = packageManager || this.getPackageManager(directory);
     let output = "";
@@ -41,7 +42,10 @@ class Term {
     }
 
     if (skipStep !== INSTALL_STEP && skipStep !== BUILD_STEP) {
-      await exec(`${manager} install`, [], {
+      const installCommand = installScript
+        ? installScript
+        : `${manager} install`;
+      await exec(installCommand, [], {
         cwd: directory
       });
     }
