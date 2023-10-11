@@ -18,11 +18,12 @@ const EmptyResult = {
 };
 
 class SizeLimit {
-  static SIZE_RESULTS_HEADER = ["Path", "Size"];
+  static SIZE_RESULTS_HEADER = ["Path", "Total Size", "Size Diff"];
 
   static TIME_RESULTS_HEADER = [
     "Path",
-    "Size",
+    "Total Size",
+    "Size Diff",
     "Loading time (3g)",
     "Running time (snapdragon)",
     "Total time"
@@ -40,7 +41,7 @@ class SizeLimit {
     return `${Math.ceil(seconds * 1000)} ms`;
   }
 
-  private formatChange(base: number = 0, current: number = 0): string {
+  private formatPercentChange(base: number = 0, current: number = 0): string {
     if (base === 0) {
       return "+100% 🔺";
     }
@@ -60,6 +61,16 @@ class SizeLimit {
     return `${formatted}% 🔽`;
   }
 
+  private formatBytesDifference(base: number = 0, current: number = 0): string {
+    const value = current - base;
+
+    if (value > 0) {
+      return `+${this.formatBytes(value)}`;
+    }
+
+    return `${this.formatBytes(value)}`;
+  }
+
   private formatLine(value: string, change: string) {
     return `${value} (${change})`;
   }
@@ -73,7 +84,11 @@ class SizeLimit {
       name,
       this.formatLine(
         this.formatBytes(current.size),
-        this.formatChange(base.size, current.size)
+        this.formatPercentChange(base.size, current.size)
+      ),
+      this.formatLine(
+        this.formatBytesDifference(base.size, current.size),
+        this.formatPercentChange(base.size, current.size)
       )
     ];
   }
@@ -87,15 +102,19 @@ class SizeLimit {
       name,
       this.formatLine(
         this.formatBytes(current.size),
-        this.formatChange(base.size, current.size)
+        this.formatPercentChange(base.size, current.size)
+      ),
+      this.formatLine(
+        this.formatBytesDifference(base.size, current.size),
+        this.formatPercentChange(base.size, current.size)
       ),
       this.formatLine(
         this.formatTime(current.loading),
-        this.formatChange(base.loading, current.loading)
+        this.formatPercentChange(base.loading, current.loading)
       ),
       this.formatLine(
         this.formatTime(current.running),
-        this.formatChange(base.running, current.running)
+        this.formatPercentChange(base.running, current.running)
       ),
       this.formatTime(current.total)
     ];

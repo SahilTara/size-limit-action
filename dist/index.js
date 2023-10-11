@@ -10630,7 +10630,7 @@ class SizeLimit {
         }
         return `${Math.ceil(seconds * 1000)} ms`;
     }
-    formatChange(base = 0, current = 0) {
+    formatPercentChange(base = 0, current = 0) {
         if (base === 0) {
             return "+100% 🔺";
         }
@@ -10644,21 +10644,30 @@ class SizeLimit {
         }
         return `${formatted}% 🔽`;
     }
+    formatBytesDifference(base = 0, current = 0) {
+        const value = current - base;
+        if (value > 0) {
+            return `+${this.formatBytes(value)}`;
+        }
+        return `${this.formatBytes(value)}`;
+    }
     formatLine(value, change) {
         return `${value} (${change})`;
     }
     formatSizeResult(name, base, current) {
         return [
             name,
-            this.formatLine(this.formatBytes(current.size), this.formatChange(base.size, current.size))
+            this.formatLine(this.formatBytes(current.size), this.formatPercentChange(base.size, current.size)),
+            this.formatLine(this.formatBytesDifference(base.size, current.size), this.formatPercentChange(base.size, current.size))
         ];
     }
     formatTimeResult(name, base, current) {
         return [
             name,
-            this.formatLine(this.formatBytes(current.size), this.formatChange(base.size, current.size)),
-            this.formatLine(this.formatTime(current.loading), this.formatChange(base.loading, current.loading)),
-            this.formatLine(this.formatTime(current.running), this.formatChange(base.running, current.running)),
+            this.formatLine(this.formatBytes(current.size), this.formatPercentChange(base.size, current.size)),
+            this.formatLine(this.formatBytesDifference(base.size, current.size), this.formatPercentChange(base.size, current.size)),
+            this.formatLine(this.formatTime(current.loading), this.formatPercentChange(base.loading, current.loading)),
+            this.formatLine(this.formatTime(current.running), this.formatPercentChange(base.running, current.running)),
             this.formatTime(current.total)
         ];
     }
@@ -10695,10 +10704,11 @@ class SizeLimit {
         return [header, ...fields];
     }
 }
-SizeLimit.SIZE_RESULTS_HEADER = ["Path", "Size"];
+SizeLimit.SIZE_RESULTS_HEADER = ["Path", "Total Size", "Size Diff"];
 SizeLimit.TIME_RESULTS_HEADER = [
     "Path",
-    "Size",
+    "Total Size",
+    "Size Diff",
     "Loading time (3g)",
     "Running time (snapdragon)",
     "Total time"
