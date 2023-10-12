@@ -33,12 +33,12 @@ class Term {
 
     if (branch) {
       try {
-        await exec(`git fetch origin ${branch} --depth=1`);
+        await exec(`git fetch origin ${branch}`);
       } catch (error) {
         console.log("Fetch failed", error.message);
       }
 
-      await exec(`git checkout -f ${branch}`);
+      await exec(`git checkout -f $(git merge-base ${branch} HEAD)`);
     }
 
     if (skipStep !== INSTALL_STEP && skipStep !== BUILD_STEP) {
